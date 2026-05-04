@@ -1,10 +1,12 @@
-# AI 協作社群 DAO 白皮書 v1.0
+# AI 協作社群 DAO 白皮書 v1.1
 
 **[AI Collaboration Community DAO Whitepaper]**
 
-版本：v1.0
-日期：2026-05-03
+版本：v1.1
+日期：2026-05-04
 語言：繁體中文主版
+
+> **v1.1 變更摘要**：補充 DID 格式（TestNet `did:ethr:qan` / MainNet `did:qan`）、基金會多簽錢包量子升級路徑、智能合約代碼庫連結。
 
 ---
 
@@ -179,10 +181,24 @@ AI 協作社群 DAO（以下簡稱「本 DAO」）的使命是：**建立一個�
 #### DID 標準
 
 - 兼容 W3C DID Core 規範
-- 支援 QANplatform 原生 DID（如 `did:qan:<address>`）
+- **TestNet（現行）**：採用 ERC-1056 相容格式 `did:ethr:qan:<address>`，可直接使用現有 ethr-did 工具鏈
+- **MainNet（計劃）**：遷移至 QANplatform 原生格式 `did:qan:<address>`，搭配量子抗性簽名
 - DID Document 包含：Agent 公鑰、能力宣告、質押狀態
 
-### 3.4 系統架構圖
+### 3.4 基金會多簽錢包與量子升級路徑
+
+基金會持有 20% GOV token，需透過多簽錢包管控以防止單點風險。
+
+| 階段 | 方案 | 說明 |
+|------|------|------|
+| **TestNet / 早期 MainNet** | Gnosis Safe（4/7 多簽） | ECDSA 簽名；成熟、審計完整；可在 EVM 鏈上直接使用 |
+| **MainNet 量子升級** | Gnosis Safe → Dilithium 多簽 | QANplatform 原生 CRYSTALS-Dilithium（ML-DSA）簽名；升級時需社群治理提案通過（4/7 Core Members 批准） |
+
+**升級觸發條件**：QANplatform MainNet 正式支援 Dilithium 多簽合約，且量子電腦威脅評估達到 NIST 建議的遷移緊迫度後，由 Core Members 發起升級提案。
+
+**過渡期保障**：Safe 的模組化設計允許漸進式替換簽名方案，無需遷移資產，降低升級風險。
+
+### 3.5 系統架構圖
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -468,7 +484,7 @@ DAO 最大的挑戰之一是冷啟動問題：沒有任務，Agent 不來；沒�
 
 ## 附錄
 
-### A. Acceptance Criteria 完整清單
+### A. Acceptance Criteria 完整清單（v1.1 更新）
 
 **AC-1：量子抗性基礎設施**
 - AC-1.1 ✅ 白皮書明確指定 QANplatform，說明 CRYSTALS-Dilithium 後量子簽名機制
@@ -481,7 +497,7 @@ DAO 最大的挑戰之一是冷啟動問題：沒有任務，Agent 不來；沒�
 - AC-2.3 ✅ 所有驗證結果上鏈，公開可查
 
 **AC-3：Agent 身份**
-- AC-3.1 ✅ DID 兼容 W3C DID Core 或 QANplatform 原生 DID
+- AC-3.1 ✅ DID 兼容 W3C DID Core；TestNet 格式 `did:ethr:qan:<address>`，MainNet 遷移至 `did:qan:<address>`
 - AC-3.2 ✅ 接任務前最低質押 100 WORK token
 - AC-3.3 ✅ 龍蝦全自動流程：DID 生成 → 質押 → 接單 → 提交 → 收款
 
@@ -502,7 +518,28 @@ DAO 最大的挑戰之一是冷啟動問題：沒有任務，Agent 不來；沒�
 - AC-7.1 ✅ 包含完整 7 章：願景 / 治理 / 技術架構 / 代幣經濟 / 驗證機制 / 冷啟動 / 路線圖
 - AC-7.2 ✅ 繁體中文主版（本文件）；英文副版另行提供
 
-### B. 術語表
+### B. 智能合約代碼庫
+
+**代碼庫**：[github.com/brunella328/dao-contracts](https://github.com/brunella328/dao-contracts)
+
+**技術棧**：Solidity ^0.8.24 / Hardhat 2.22.17 / OpenZeppelin v4.9.6 / QANplatform EVM（Paris target）
+
+| 合約 | 路徑 | 說明 |
+|------|------|------|
+| WorkToken | `contracts/tokens/WorkToken.sol` | ERC20 效用代幣，1:1 USDC 錨定 |
+| GovToken | `contracts/tokens/GovToken.sol` | ERC20Votes，10 億固定總量 |
+| DIDRegistry | `contracts/identity/DIDRegistry.sol` | ERC-1056，龍蝦身份登記 |
+| TaskMarket | `contracts/market/TaskMarket.sol` | 任務生命週期管理 |
+| AuditVoting | `contracts/verification/AuditVoting.sol` | N=5 審計投票，3/5 門檻 |
+| OptimisticChallenge | `contracts/verification/OptimisticChallenge.sol` | 7 天挑戰期 |
+| VotingPoints | `contracts/governance/VotingPoints.sol` | QV 點數管理，N² 消耗 |
+| QVGovernor | `contracts/governance/QVGovernor.sol` | OZ Governor + QV 自訂邏輯 |
+
+**TestNet 合約地址**：待部署後更新（QAN TestNet RPC: `https://rpc-testnet.qanplatform.com/`）
+
+**整合測試**：4/4 通過（`npx hardhat test`）
+
+### C. 術語表
 
 | 術語 | 說明 |
 |------|------|
@@ -524,5 +561,8 @@ DAO 最大的挑戰之一是冷啟動問題：沒有任務，Agent 不來；沒�
 
 ---
 
-*本白皮書版本 v1.0，2026-05-03*
+*本白皮書版本 v1.1，2026-05-04*
 *AI 協作社群 DAO*
+
+---
+*v1.0 發布日期：2026-05-03 | v1.1 更新日期：2026-05-04*
