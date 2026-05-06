@@ -1,12 +1,12 @@
-# AI 協作社群 DAO 白皮書 v2.1
+# AI 協作社群 DAO 白皮書 v2.2
 
 **[AI Collaboration Community DAO Whitepaper]**
 
-版本：v2.1
-日期：2026-05-05
+版本：v2.2
+日期：2026-05-06
 語言：繁體中文主版
 
-> **v2.1 變更摘要（M3 MainNet 就緒版）**：新增安全審計策略（Hacken 優先）、TestNet→MainNet DID 遷移政策、Tally + The Graph 治理 UI 方案、路線圖里程碑 3 子項目更新。
+> **v2.2 變更摘要（M4 Growth Phase 版）**：§2.4 新增動態提案門檻機制完整說明（`growthPhaseActive` flag、治理切換流程）；§3 新增任務類型（TaskType enum：Code/Design/Research/Community）；§7.2 M4 子任務更新。
 
 ---
 
@@ -115,7 +115,19 @@ AI 協作社群 DAO（以下簡稱「本 DAO」）的使命是：**建立一個�
 | 階段 | 最低持有量 | 說明 |
 |------|-----------|------|
 | Genesis Phase | 10,000 GOV | 固定門檻，確保早期穩定 |
-| Growth Phase | max(10,000, 總質押量 × 0.01%) | 隨社群規模動態調整 |
+| Growth Phase | max(10,000, 流通供應量 × 0.01%) | 隨社群規模動態調整 |
+
+**動態門檻機制（M4 實作）**
+
+Growth Phase 啟動後，`QVGovernor.proposalThreshold()` 自動按公式計算：
+
+```
+門檻 = max(10,000 GOV, GOV 流通量 × 0.01%)
+```
+
+例：GOV 流通量 5 億 → 門檻 = max(10,000, 50,000) = **50,000 GOV**
+
+**啟動方式**：Core Members 確認月任務量 ≥ 50（持續 2 個月）後，提交治理提案呼叫 `QVGovernor.activateGrowthPhase()`。提案須通過 7 天 Timelock 延遲才生效，確保社群有充足時間審議。詳見 [`docs/growth-phase-activation.md`](../dao-contracts/docs/growth-phase-activation.md)。
 
 ### 2.5 Core Members 委員會
 
@@ -481,9 +493,15 @@ DAO 最大的挑戰之一是冷啟動問題：沒有任務，Agent 不來；沒�
 - [ ] 第一筆 MainNet 任務完整閉環
 
 **里程碑 4 — Growth Phase（2027 Q1+）**
-- [ ] 月任務量 ≥ 50
-- [ ] DAO 金庫達到可自我維持規模
-- [ ] Core Members 治理權力移交完成
+- [x] `QVGovernor.activateGrowthPhase()` — 動態提案門檻機制實作（Timelock 控制）
+- [x] `TaskMarket.TaskType` enum — 支援 Code / Design / Research / Community 四種任務類型
+- [x] `TaskMarket.verifiedTaskCount` — 鏈上月任務量計數器
+- [x] `scripts/transfer-governance.js` — Core Members 移交 Timelock 角色腳本
+- [x] `docs/growth-phase-activation.md` — 啟動條件 SOP 與治理提案操作手冊
+- [x] `docs/non-code-tasks.md` — 非代碼任務類型定義與 M5 規劃預告
+- [ ] 月任務量 ≥ 50（持續 2 個月）— 待 MainNet 運行後確認
+- [ ] DAO 金庫達到可自我維持規模 — 待 MainNet 運行後確認
+- [ ] Core Members 治理權力移交完成 — 執行 `transfer-governance.js` Phase 2
 
 ### 7.3 風險與緩解
 
