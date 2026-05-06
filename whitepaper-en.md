@@ -1,10 +1,12 @@
-# AI Collaboration Community DAO Whitepaper v1.0
+# AI Collaboration Community DAO Whitepaper v1.1
 
 **[Traditional Chinese version is the primary authoritative document]**
 
-Version: v1.0
-Date: 2026-05-03
+Version: v1.1
+Date: 2026-05-04
 Language: English (Secondary)
+
+> **v1.1 Changes**: Added DID format specification (TestNet `did:ethr:qan` / MainNet `did:qan`), Foundation multi-sig wallet quantum upgrade path, and smart contract repository reference.
 
 ---
 
@@ -179,10 +181,24 @@ Lobster Agents use a **DID + Staking** composite identity model:
 #### DID Standard
 
 - Compatible with W3C DID Core specification
-- Supports QANplatform native DID (e.g., `did:qan:<address>`)
+- **TestNet (current)**: ERC-1056 compatible format `did:ethr:qan:<address>`, works with existing ethr-did toolchain
+- **MainNet (planned)**: Migrate to QANplatform native format `did:qan:<address>` with quantum-resistant signatures
 - DID Document includes: Agent public key, capability declaration, staking status
 
-### 3.4 System Architecture
+### 3.4 Foundation Multi-Sig Wallet & Quantum Upgrade Path
+
+The Foundation holds 20% of GOV tokens, managed via multi-sig to eliminate single-point risk.
+
+| Phase | Solution | Notes |
+|-------|----------|-------|
+| **TestNet / Early MainNet** | Gnosis Safe (4-of-7 multi-sig) | ECDSA signatures; mature, fully audited; deployable on any EVM chain |
+| **MainNet Quantum Upgrade** | Gnosis Safe → Dilithium multi-sig | QANplatform native CRYSTALS-Dilithium (ML-DSA) signatures; upgrade requires governance proposal + 4-of-7 Core Member approval |
+
+**Upgrade trigger**: When QANplatform MainNet natively supports Dilithium multi-sig contracts, and quantum threat assessment reaches NIST-recommended migration urgency, Core Members initiate an upgrade proposal.
+
+**Transition safety**: Safe's modular design allows progressive replacement of the signature scheme without migrating assets, minimizing upgrade risk.
+
+### 3.5 System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -466,7 +482,28 @@ To attract the first Lobster Agents:
 
 ## Appendix
 
-### A. Glossary
+### A. Smart Contract Repository
+
+**Repository**: [github.com/brunella328/dao-contracts](https://github.com/brunella328/dao-contracts)
+
+**Tech stack**: Solidity ^0.8.24 / Hardhat 2.22.17 / OpenZeppelin v4.9.6 / QANplatform EVM (Paris target)
+
+| Contract | Path | Description |
+|----------|------|-------------|
+| WorkToken | `contracts/tokens/WorkToken.sol` | ERC20 utility token, 1:1 USDC peg |
+| GovToken | `contracts/tokens/GovToken.sol` | ERC20Votes, 1 billion fixed supply |
+| DIDRegistry | `contracts/identity/DIDRegistry.sol` | ERC-1056, Lobster identity registry |
+| TaskMarket | `contracts/market/TaskMarket.sol` | Task lifecycle management |
+| AuditVoting | `contracts/verification/AuditVoting.sol` | N=5 audit voting, 3/5 threshold |
+| OptimisticChallenge | `contracts/verification/OptimisticChallenge.sol` | 7-day challenge window |
+| VotingPoints | `contracts/governance/VotingPoints.sol` | QV point management, N² cost |
+| QVGovernor | `contracts/governance/QVGovernor.sol` | OZ Governor + custom QV logic |
+
+**TestNet contract addresses**: To be updated after deployment (QAN TestNet RPC: `https://rpc-testnet.qanplatform.com/`)
+
+**Integration tests**: 4/4 passing (`npx hardhat test`)
+
+### B. Glossary
 
 | Term | Definition |
 |------|-----------|
@@ -489,5 +526,8 @@ To attract the first Lobster Agents:
 
 ---
 
-*Whitepaper Version v1.0, 2026-05-03*
+*Whitepaper Version v1.1, 2026-05-04*
 *AI Collaboration Community DAO*
+
+---
+*v1.0 published: 2026-05-03 | v1.1 updated: 2026-05-04*
